@@ -22,7 +22,7 @@ class Transaction :
    def __init__(self, tType = "", amount = 0.0) :
       
       assert amount >= 0.0
-      assert isinstance(amount, float)
+      assert isinstance(amount, float) or isinstance(amount, int)
       assert tType in Transaction._typeSet
       
       if Transaction.DEBUG:
@@ -69,7 +69,6 @@ class Transaction :
    #  @return result: the sum of the two transaction prices
    
    def __add__(self, other) :
-      assert isinstance(other, Transaction)
       return (self._amount + other._amount)
    
    # adds an transaction to the second transaction.
@@ -77,14 +76,12 @@ class Transaction :
    #  @return result: the sum of the two transaction amounts
    
    def __sub__(self, other) :
-      assert isinstance(other, Transaction)
       return (self._amount - other._amount)
 
    # implements the sum() function that will sum a list of the Transactions
    #  @param other: the transaction your are adding to the sum
    #  @return: the sum of the transaction amounts in the list
    def __radd__(self, other):
-      assert isinstance(other, Transaction)
       return other + self._amount
 
    # Define the accessor methods
@@ -125,34 +122,6 @@ class Transaction :
 
    # Define the mutator methods
    
-   # Mutator method that sets the transaction type for a transaction
-   # @ensure tType: must be Deposit, Withdrawal, Interest, Transfer, or Penalty.
-   def setTType(self):
-      optionSet = {1, 2, 3, 4}
-      
-      option = None
-      while option not in optionSet:
-         print("Please enter the transaction type")
-         print("Select from: ")
-         print("   1 - Deposit")
-         print("   2 - Withdrawal")
-         print("   3 - Interest Payment")
-         print("   3 - Transfer", end = "")
-         option = int(input(":"))
-      if option == 1:
-         tType = "deposit"
-      elif option == 2:
-         tType = "withdrawal"
-      elif option == 3:
-         tType = "interest"
-      elif option == 4:
-         tType = "transfer"      
-      else:
-         print("Invalid input")
-         tType = none
-      self._tType = tType
-      return
-
    # Helper method that calls the system to get the current data and set the date for a transaction
    def _setDate(self):
       date = str(datetime.date.today())
