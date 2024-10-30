@@ -106,7 +106,7 @@ class BankAccount:
 
     # return a list of all transactions
     # @return: a list, a list of the transactions
-    def getTransactions(self)->list:
+    def _getTransactions(self)->list:
         return self._transactionList
 
     # returns the account number
@@ -116,7 +116,7 @@ class BankAccount:
 
     # returns the overdraft counter
     # @return: an integer, the overdraft counter
-    def getOverdraftCounter(self)->int:
+    def _getOverdraftCounter(self)->int:
         return self._overdraftCounter
 
     # converts the transaction list into a readable string 
