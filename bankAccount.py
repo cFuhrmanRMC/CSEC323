@@ -111,7 +111,7 @@ class BankAccount:
 
     # returns the account number
     # @return: an integer, the account number
-    def getAccountNumber(self)->int:
+    def _getAccountNumber(self)->int:
         return self._accountNumber
 
     # returns the overdraft counter
