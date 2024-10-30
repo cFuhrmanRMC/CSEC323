@@ -103,7 +103,7 @@ class Transaction :
 
    # getTType returns the transaction type of the transaction.
    # @return: The transaction type of the transaction
-   def _getTType(self) :
+   def getTType(self) :
       return self._tType
    
    # Prints all of the transaction instance variables.
