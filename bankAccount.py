@@ -106,17 +106,17 @@ class BankAccount:
 
     # return a list of all transactions
     # @return: a list, a list of the transactions
-    def _getTransactions(self)->list:
+    def getTransactions(self)->list:
         return self._transactionList
 
     # returns the account number
     # @return: an integer, the account number
-    def _getAccountNumber(self)->int:
+    def getAccountNumber(self)->int:
         return self._accountNumber
 
     # returns the overdraft counter
     # @return: an integer, the overdraft counter
-    def _getOverdraftCounter(self)->int:
+    def getOverdraftCounter(self)->int:
         return self._overdraftCounter
 
     # converts the transaction list into a readable string 
@@ -139,7 +139,7 @@ class BankAccount:
 
     # increases the overdraftCounter by 1
     # @ensure overdraftCounter is incremented by 1
-    def increaseOverdraftCounter(self):
+    def _increaseOverdraftCounter(self):
         self._overdraftCounter = self._overdraftCounter + 1
 
 
@@ -261,6 +261,6 @@ class BankAccount:
     # add a transaction object to the list of transactions
     # @param: transaction, a tranaction object
     # @require transaction is a valid transaction object
-    def addTransaction(self, transaction: Transaction):
+    def _addTransaction(self, transaction: Transaction):
         assert isinstance(transaction, Transaction), "transaction must be a valid transaction object"
         self._transactionList.append(transaction)
