@@ -40,10 +40,7 @@ class Client:
         # Postconditions:
         # - A unique client number is assigned.
         # - The client has a list of accounts.
-
-        assert 1 <= len(firstName) <= 25 and firstName.isalpha(), "Invalid first name."
-        assert 1 <= len(lastName) <= 40 and lastName.isalpha(), "Invalid last name."
-        
+  
         # Ensure valid phone number (does not include dashes)
         assert phone[0] != 0 and len(phone) == 10 and phone.isnumeric(), "Invalid phone number"	
         
