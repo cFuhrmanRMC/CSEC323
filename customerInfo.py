@@ -21,7 +21,7 @@ class Address():
         validStates = ["VA","MD","NJ","PA","DE","NC","WV","DC"]
         
         # Check street + city + state abbrev
-        assert 1 <= len(street)<= 30 and street.isalpha(), "Invalid street name"
+        assert 1 <= len(street)<= 30 and street.isalnum(), "Invalid street name"
         assert 1 <= len(city)<= 30 and city.isalpha(), "Invalid city name"
         assert len(stateAbbrev) == 2 and stateAbbrev in validStates, "Invalid state"
         
