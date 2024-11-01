@@ -28,7 +28,7 @@ class BankAccount:
     # @require balance: must be a positive float
     # @ensure self._balance >= 0.0
     # @ensure unique account number is assigned
-    def __init__(self, firstName: str, lastName: str, balance: float = 0.0 ):
+    def __init__(self,accountType: str, balance: float = 0.0 ):
 
         # Preconditions:
         # - firstName must be a valid string of 1-25 alphabetic characters.
@@ -39,14 +39,12 @@ class BankAccount:
         # - A unique account number is assigned.
         # - The initial balance is set or defaulted to 0.0.
 
-        assert 1 <= len(firstName) <= 25 and firstName.isalpha(), "Invalid first name."
-        assert 1 <= len(lastName) <= 40 and lastName.isalpha(), "Invalid last name."
+        assert accountType in ["Checking", "Savings"], "Invalid account type."      
         assert isinstance(balance, float), "balance must be a floating point value"
         assert balance >= 0.0, "Initial balance must be non-negative."
 
 
-        self._firstName = firstName # First name
-        self._lastName = lastName # Last name
+        self._accountType = accountType  # Account type: "Checking" or "Savings"
         self._balance = balance # Account balance
         self._accountNumber = BankAccount._nextAccountNumber # set account number
 
@@ -64,40 +62,37 @@ class BankAccount:
     # return the account details in a string readable format
     # @return: The formatted, human readable string of the account
     def __repr__(self) -> str:
-        # display first name, last name, account number, balance, and transaction list
+       # display accountType, account number, balance, and transaction list
         return ("Bank Account\nAccount Holder = %s %s\nAccount Number = %d\nBalance = $%.2f\nTransactions:\n%s \n" %
-        (self._firstName, self._lastName, self._accountNumber, self._balance, self.displayTransactions()))
+        (self._accountType, self._accountNumber, self._balance, self.displayTransactions())) 
 
 
     # return the account details in a string readable format
     # @return: The formatted, human readable string of the account
     def __str__(self) -> str:
-        # display first name, last name, account number, balance, and transaction list
+        # display accountType, account number, balance, and transaction list
         return ("Bank Account\nAccount Holder = %s %s\nAccount Number = %d\nBalance = $%.2f\nTransactions:\n%s \n" %
-        (self._firstName, self._lastName, self._accountNumber, self._balance, self.displayTransactions()))
-
+        (self._accountType, self._accountNumber, self._balance, self.displayTransactions())) 
         
     # Checks a BankAccount to see if it is equal to the second BankAccount
     # @param other: the transaction your are comparing the first transaction with
     # @return result: True if this two transaction have the same amount and dates, and tNumber
     def __eq__(self, other) -> bool :
-        result = (self._firstName == other._firstName) and (self._lastName == other._lastName) and (self._accountNumber == other._accountNumber) and (self._balance == other._balance) and (self._transactionList == other._transactionList) and (self._overdraftCounter == other._overdraftCounter)
-        return result 
-
-    
+        result = (self._account_type == other._account_type and
+                self._accountNumber == other._accountNumber and
+                self._balance == other._balance and
+                self._transactionList == other._transactionList and
+                self._overdraftCounter == other._overdraftCounter)
+         return result 
+        
     ##
     # Define acessor methods
     ##
-
-    # returns the first name of the account holder
-    # @return: a string, the first name of the account holder
-    def getFirstName(self)->str:
-        return self._firstName
-
-    # returns the last name of the account holder
-    # @return: a string, the last name of the account holder
-    def getLastName(self)->str:
-        return self._lastName
+   
+    # return the type of the account
+    # @return: a string, account type
+    def getAccountType(self) -> str:
+        return self._account_type
 
     # return the balance of the account
     # @return: a foating point, the balance of the account
