@@ -13,6 +13,9 @@
 class Address():
     
 
+    # private global variable to declare list of valid states
+    _VALID_STATES = {"VA","MD","NJ","PA","DE","NC","WV","DC"}
+
     # Constructs an address object
     # 
     # @param address, a list for address details
@@ -23,22 +26,26 @@ class Address():
         
         # Ensure length of address
         assert len(address) == 3, "Invalid address"
+
+        # Ensure street is tuple
+        assert isinstance(address[0], tuple), "Street must be of type tuple with number in first index, street in second"
         
-        # Grab details of address
+        # Grab details of address/street
         street = address[0]
+        streetNo = street[0]
+        streetName = street[1]
         city = address[1]
         stateAbbrev = address[2]
-        
-        #list of valid states
-        validStates = ["VA","MD","NJ","PA","DE","NC","WV","DC"]
-        
-        # Check street + city + state abbrev
-        assert 1 <= len(street)<= 30 and street.isalnum(), "Invalid street name"
+    
+        # Check street number/street + city + state abbrev
+        assert isinstance(streetNo, str), "Street number should be a string"
+        assert 1 <= len(streetNo)<= 5 and streetNo.isnumeric(), "Invalid street name"
+        assert 1 <= len(streetName)<= 25 and streetName.replace(" ", '').isalpha(), "Invalid street name"
         assert 1 <= len(city)<= 30 and city.isalpha(), "Invalid city name"
-        assert len(stateAbbrev) == 2 and stateAbbrev in validStates, "Invalid state"
+        assert len(stateAbbrev) == 2 and stateAbbrev in Address._VALID_STATES, "Invalid state"
         
         # Store data in instance variables
-        self._street = street
+        self._street = street[0] + ' ' + street[1]
         self._city = city
         self._state = stateAbbrev
 
@@ -56,6 +63,51 @@ class Address():
     # @return state, a string
     def getState(self)->str:
         return self._state
+    
+    # Update street information
+    # @param newStreet, the new street to change in the Address
+    # @require street: must be tuple with first index between 1 and 5 numberic characters with no special characters, second index 
+    # between 1 and 25 no special characters. Total of 30 characters
+    # @ensure street is updated
+    def updateStreet(self, newStreet: tuple)->None:
+
+        # Ensure street is tuple
+        assert isinstance(newStreet, tuple), "Street must be of type tuple with number in first index, street in second"
+
+        # check street number + street name
+        streetNo = newStreet[0]
+        street = newStreet[1]
+
+        assert isinstance(streetNo, str), "Street number should be a string"
+        assert 1 <= len(streetNo)<= 5 and streetNo.isnumeric(), "Invalid street name: must be numeric"
+        assert 1 <= len(street)<= 25 and street.replace(" ", '').isalpha(), "Invalid street name: cannot contain numnbers"
+
+        # Store data in instance variable
+        self._street = streetNo + " " + street
+
+    # Update city information
+    # @param newCity, the new street to change in the Address
+    # @require city: must be between 1 and 30 characters with no special characters.
+    # @ensure city is updated
+    def updateCity(self, newCity: str)->None:
+        
+        # check city
+        assert 1 <= len(newCity)<= 30 and newCity.isalpha(), "Invalid city name"
+        
+        # Store data in instance variable
+        self._city = newCity
+
+    # Update state information
+    # @param newState, the new state to change in the Address
+    # @require state: must be between 2 characters and within set of valid states
+    # @ensure state is updated
+    def updateState(self, newState: str)->None:
+        
+        # Check state abbreviation
+        assert len(newState) == 2 and newState in Address._VALID_STATES, "Invalid state"
+
+        # Store data in instance variable
+        self._state = newState
     
     # @return result: True if this two Addresses have the same streets, citys, and state abbreviations
     def __eq__(self, other) -> bool :
@@ -102,6 +154,30 @@ class Name():
     def getLastName(self):
         return self._lastName
     
+    # Update first name
+    # @param first, the new first name to change in the Name
+    # @require firstName: must be between 1 and 25 characters with no special characters
+    # @ensure first name is updated
+    def updateFirstName(self, first: str)->None:
+        
+        # check first name
+        assert 1 <= len(first) <= 25 and first.isalpha(), "Invalid first name."
+        
+        # Store data in instance variable
+        self._firstName = first
+
+    # Update last name
+    # @param first, the new last name to change in the Name
+    # @require lastName: must be between 1 and 40 characters with no special characters
+    # @ensure last name is updated
+    def updateLastName(self, last: str)->None:
+        
+        # check first name
+        assert 1 <= len(last) <= 40 and last.isalpha(), "Invalid last name."
+        
+        # Store data in instance variable
+        self._lastName = last
+
     # @return result: True if this two Names have the same firsts and lasts names  
     def __eq__(self, other) -> bool :
         result = (self._firstName == other._firstName) and (self._lastName == other._lastName)
@@ -142,6 +218,18 @@ class Phone():
     def getPhone(self)->str:
 
         return self._phone
+    
+    # Update phone number
+    # @param phone, the new phone name to change in the Phone
+    # @require phone: must be all numeric digits, length is 10, cannot start with “0”
+    # @ensure phone is updated
+    def updatePhone(self, phone: str)->None:
+        
+        # Ensure valid phone number (does not include dashes)
+        assert phone[0] != 0 and len(phone) == 10 and phone.isnumeric(), "Invalid phone number; remove any dashes"	
+        
+        # Store data in instance variable
+        self._phone = phone
     
     # @return result: True if this two Phones are the same
     def __eq__(self, other) -> bool :
