@@ -146,12 +146,12 @@ class Client:
         
 
     # open an account based on type for the client
-    # @param accountType: string, the type of bank account
-    # @require accountType is either "Checking" or "Savings"
+    # @param bankAccount: BankAccount, the account object
+    # @require bankAccount has been initalized and in Client list of accounts.
     # @require client has at least one bank account
-    # @ensure account is added to list of bank accounts for client
-    def closeAccount(self, accountNumber: int)->bool:
-        
+    # @ensure account has been closed for Client
+    def closeAccount(self, bankAccount: BankAccount)->bool:
+
         # return False if Client only has one account
         if len(self._accounts) == 1:
             return False
@@ -163,16 +163,13 @@ class Client:
         # iterate accounts held by client
         while (i < len(self._accounts) and not found):
             
-            # identify account number
-            temp = self._accounts[i].getAccountNumber()
-
             # check if correct account
-            if accountNumber == temp:
+            if bankAccount == self._accounts[i]:
                 account = self._accounts[i]
                 found = True
 
         # ensure account number exists
-        assert found, "Invalid account number"
+        assert found, "Invalid BankAccount"
 
         # Get balance + withdrawal all funds from account
         balance = account.getBalance()
