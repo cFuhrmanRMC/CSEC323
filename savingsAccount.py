@@ -1,13 +1,12 @@
 # Authors: Cole Fuhrman, Bryce Kuberek, Jalen Neck, Trace Taylor, Dillon VanGlider
-# Project 2
+# Project 3
 # CSEC 323
 # savingsAccount.py
 #
 from AES_CBC import encrypt_AES_CBC, decrypt_AES_CBC
 from bankAccount import BankAccount  
 from transaction import Transaction
-
-
+from client import Client
 
 # The Savings Account class should inherit all the core attributes and methods of the BankAccount.
 class SavingsAccount(BankAccount):
@@ -117,20 +116,20 @@ class SavingsAccount(BankAccount):
         
         
     # Encrypts and writes a single savings account transaction to "savings.txt" for permanent storage.
-    # @param transactionTuple: A tuple containing the string formats for a transaction object and the account number
-    
-    # @ensure tuple contains valid information
-    def _save_transactions(self, transactionTuple: tuple):
-        assert isinstance(transactionTuple[0], str)
-        assert isinstance(transactionTuple[1], str)
+    # Separate files for accounts
+    def _save_transactions(self, transaction: str):
+        fileName = "savings_{}.txt".format(self.getAccountNumber())
+        with open(fileName, "ab") as outfile:        
+            
+            # Validate that the transaction is a string
+            assert isinstance(transaction, str), "Transaction data must be a string."
         
-        with open("savings.txt", "ab") as outfile:
-            
-            result = encrypt_AES_CBC(transactionTuple[0] + " " +  transactionTuple[1], self.key, self.iv)
-            
-            outfile.write(str(len(result)).encode() + b"\n")
-            
-            outfile.write(result + b"\n")
+            # Encrypt the transaction data
+            result = encrypt_AES_CBC(transaction, self.key, self.iv)
+        
+            # Write encrypted transaction to the file
+            outfile.write(str(len(result)).encode() + b"\n")  # Write the length of the encrypted data
+            outfile.write(result + b"\n")                   # Write the encrypted transaction
         outfile.close()
         
             
@@ -138,26 +137,32 @@ class SavingsAccount(BankAccount):
 
     # Reads all encrypted transactions from "savings.txt", decrypts each, and prints to the console.
     def _load_transactions(self) -> str:
-        with open("savings.txt", "r+b") as infile:
+        fileName = "savings_{}.txt".format(self.getAccountNumber())
+        with open(fileName, "r+b") as outfile: 
             # Loop to read and decrypt each transaction in the file
             length = infile.readline().rstrip().decode()
             
             result = ""
             
+            try:
+                while length != "":
+                    length = int(length)
+                    data = infile.read(length)
+                    decrypted_data = decrypt_AES_CBC(data, self.key, self.iv)
+                    
+                    #Checks to see if transaction matches associated account number before adding it to the result
+                    if str(self.getAccountNumber()) in decrypted_data:
+                        result = result + decrypted_data + "\n" 
+                    
+                    # Move to the next transaction
+                    infile.readline()
+                    length = infile.readline().rstrip().decode()
+                    
+            except FileNotFoundError:
+                print(f"No transaction file found for account {self.getAccountNumber()}.")
+            except Exception as e:
+                print("Error reading transactions: ", e)
             
-            
-            while length != "":
-                length = int(length)
-                data = infile.read(length)
-                decrypted_data = decrypt_AES_CBC(data, self.key, self.iv)
-                
-                #Checks to see if transaction matches associated account number before adding it to the result
-                if str(self.getAccountNumber()) in decrypted_data:
-                    result = result + decrypted_data + "\n" 
-                
-                # Move to the next transaction
-                infile.readline()
-                length = infile.readline().rstrip().decode()
                 
             return result
         
@@ -180,8 +185,7 @@ class SavingsAccount(BankAccount):
                 
         
                 
-        
-        
+    
     # Overrides _addTransaction from BankAccount to save each transaction to file immediately.
     # @param transaction: The transaction object to add to the transaction list and save to file. 
     def _addTransaction(self, transaction: Transaction):
@@ -196,14 +200,6 @@ class SavingsAccount(BankAccount):
     def __eq__(self, other):
         return(self.getBalance() == other.getBalance() and self.getAccountNumber() == other.getAccountNumber())
         
-
-   
-   
-   
-   
-   
-   
-   
         
 # Test function to demonstrate account actions and transaction loading.
 def main():
@@ -212,9 +208,6 @@ def main():
     myAccount.withdrawal(20.00) # Test withdrawal
     myAccount.deposit(30.00) # Test deposit
     myAccount.addInterest() # Test interest addition
-    
-
-    
   
     print(myAccount)
     
