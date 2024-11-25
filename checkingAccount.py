@@ -7,6 +7,7 @@
 from AES_CBC import encrypt_AES_CBC, decrypt_AES_CBC
 from bankAccount import BankAccount
 from transaction import Transaction
+from client import Client
 
 # The Checking Account class should inherit all the core attributes and methods of the BankAccount class.
 class CheckingAccount(BankAccount):
@@ -64,17 +65,19 @@ class CheckingAccount(BankAccount):
 
         
     # Encrypts and writes a single checking account transaction to "checking.txt" for permanent storage.
-    # @param transactionTuple: a tuple containing the string versions of a transaction object and the account number 
-    def _save_transactions(self, transactionTuple: tuple):
-        with open("checking.txt", "ab") as outfile:
-            assert isinstance(transactionTuple[0], str)
-            assert isinstance(transactionTuple[0], str)
-            
-            result = encrypt_AES_CBC(transactionTuple[0] + " " +  transactionTuple[1], self.key, self.iv)
-            
-            outfile.write(str(len(result)).encode() + b"\n")
-            
-            outfile.write(result + b"\n")
+    # Separate files for accounts
+    def _save_transactions(self):
+        fileName = "checking_{}.txt".format(self.getAccountNumber())
+        with open(fileName, "r+b") as outfile:
+             # Validate that the transaction is a string
+            assert isinstance(transaction, str), "Transaction data must be a string."
+        
+            # Encrypt the transaction data
+            result = encrypt_AES_CBC(transaction, self.key, self.iv)
+        
+            # Write encrypted transaction to the file
+            outfile.write(str(len(result)).encode() + b"\n")  # Write the length of the encrypted data
+            outfile.write(result + b"\n")                   # Write the encrypted transaction
         outfile.close()
         
             
@@ -82,7 +85,8 @@ class CheckingAccount(BankAccount):
 
     # Reads all encrypted transactions from "checking.txt", decrypts each, and prints to the console.
     def _load_transactions(self) -> str:
-        with open("checking.txt", "r+b") as infile:
+        fileName = "checking_{}.txt".format(self.getAccountNumber())
+        with open(fileName, "ab") as outfile:
             # Loop to read and decrypt each transaction in the file
             length = infile.readline().rstrip().decode()
             
@@ -143,11 +147,13 @@ class CheckingAccount(BankAccount):
         
         
         
-        
+# Test function to demonstrate account actions and transaction loading.        
 def main():
+    # Create a new savings account and perform some transactions
     myAccount = CheckingAccount(39.00)
-    myAccount.deposit(39.00)
-    myAccount.withdrawal(10.00)
+    myAccount.deposit(39.00) # Test deposit
+    myAccount.withdrawal(10.00) # Test withdrawal
+     
     print(myAccount)
     
     
