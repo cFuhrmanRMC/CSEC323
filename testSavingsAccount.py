@@ -8,21 +8,34 @@ import unittest
 
 from savingsAccount import SavingsAccount
 
+# used to test decrpytion accuracy
+from datetime import date
+
 """ Define test TestClient class by extending the unittest.TestCase class"""
 
 class TestSavingsAccount(unittest.TestCase):
     
     SAVINGS_ONE_BALANCE = 50.0
     SAVINGS_TWO_BALANCE = 100.0
-
+    SAVINGS_FOUR_BALANCE = 50.0
+    
+    INVALID_INPUTS = [-5.00, 5, "string"]
 
     
-    # The setup method creates three checking accounts
+    # The setup method creates savings accounts
     def setUp(self):
         self.savings1 = SavingsAccount(TestSavingsAccount.SAVINGS_ONE_BALANCE)
         self.savings2 = SavingsAccount(TestSavingsAccount.SAVINGS_TWO_BALANCE)
         self.savings3 = SavingsAccount()
- 
+        self.savings4 = SavingsAccount(TestSavingsAccount.SAVINGS_FOUR_BALANCE)
+        
+        # test to ensure assertions function in constructor
+        for i in range(len(TestSavingsAccount.INVALID_INPUTS)):
+            with self.assertRaises(AssertionError):
+                self.savings5 = SavingsAccount(TestSavingsAccount.INVALID_INPUTS[i])
+            
+        
+
 
     # The testConstructor method tests the constructor 
     def testConstructor(self):
@@ -33,7 +46,7 @@ class TestSavingsAccount(unittest.TestCase):
         self.assertEqual(self.savings3.getBalance(), 0.0)
       
     # The testAddInterest method tests addInterest method, ensuring it was properly overrided from bankAccount   
-    def testAddInterest(self):
+    def testaddInterest(self):
         # test to check if appropriate interest amount is added, and transaction list is updated
         self.savings1.addInterest()
         self.assertEqual(self.savings1.getBalance(), 52.00)
@@ -47,10 +60,33 @@ class TestSavingsAccount(unittest.TestCase):
         self.savings1.deposit(10.00)
         
         # test to ensure file is encrpyted
-        encryptedFile = open("savings.txt", "r")
+        encryptedFile = open(self.savings1._getFileName(), "r")
         with self.assertRaises(UnicodeDecodeError):
             encryptedFile.readline()
         encryptedFile.close()
+        
+        # ensure only strings are being encrypted
+        with self.assertRaises(AssertionError):
+            self.savings1._save_transactions(100)
+      
+    # test to ensure data integrity is maintained in decrpytion process  
+    def testDecryption(self):
+        expectedOutput = ["Transaction # 100, amount = $20.00, date " + str(date.today()) +", type: withdrawal", "Transaction # 101, amount = $30.00, date " + str(date.today()) +", type: deposit", "Transaction # 102, amount = $2.40, date " + str(date.today()) +", type: interest"]
+        self.savings4.withdrawal(20.00)
+        self.savings4.deposit(30.00)
+        self.savings4.addInterest()
+        actualOutputString = self.savings4._load_transactions()
+        
+        # Converts the decryption output into a list for comparison
+        actualOutput = actualOutputString.splitlines()
+        
+        # test to ensure exepected transactions equal actual transactions
+        for i in range(len(expectedOutput)):
+            with self.subTest(i=i):
+                self.assertEqual(expectedOutput[i], actualOutput[i])
+                
+            
+        
         
     # The testWithdrawal method tests the withdrawal method, ensuring it was properly overrided from bankAccount
     def testWithdrawal(self):
@@ -80,6 +116,15 @@ class TestSavingsAccount(unittest.TestCase):
         self.assertEqual(self.savings1, self.savings1)
         
         self.assertNotEqual(self.savings1, self.savings2)
+        
+    # test to ensure only transaction objects can be saved and subsequently encrypted
+    def testAddTransaction(self):
+        account = SavingsAccount()
+        badInputs = [100, "string", 40.00, account]
+        
+        with self.assertRaises(AssertionError):
+            for i in range(len(badInputs)):
+                self.savings1._addTransaction(badInputs[i])
         
         
         
