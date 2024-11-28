@@ -19,18 +19,33 @@ class CheckingAccount(BankAccount):
     # Constructs a checking account
     # 
     # @param balance: The user's initial balance (Floating point, must be a positive float) default set to 0.0
-    # @ensure: self.interest_rate = 0.015.
+    # @require: balance is positive, floating point numbre
     def __init__(self, balance=0.0):
         
-        # if statment that wipes the file if selected
+        # assertions to ensure input is valid
+        assert isinstance(balance, float), "Balance must be a floating point number"
+        assert balance >= 0, "Balance must be positive"
+      
+      
+        
+        # call bank account constructor
+        super().__init__("Checking", balance)
+        
+        # set the account number from the Client class
+        self._accountNumber = Client._nextAccountNumber
+        
+        # intialize overdraft counter to 0
+        self._overdraftCounter = 0
+        
+        # clears the file if RESETFILE is True
         if CheckingAccount.RESETFILE:
-            file = open("checking.txt", "w")
+            file = open("checking_{}.txt".format(self.getAccountNumber()), 'w')
             file.close()
         
-        super().__init__("Checking", balance)
-       
+        # Instance Variables for encryption
         self.key = b'MySuperSecretKey1222222222222222'  # AES-256 key (32 bytes)
         self.iv = b'MySuperSecretIV1'  # IV (16 bytes)
+       
         
     # @Override Withdrawal an amount from the account
     # @param amount: Amount to withdraw, must be positive and within the account balance.
@@ -56,20 +71,25 @@ class CheckingAccount(BankAccount):
         interest = self._balance * CheckingAccount._interestRate
         self._balance = self._balance + interest
 
-        # create a interest transaction object and add it to the transaction list
-        super()._addTransaction(Transaction("interest", interest))
+        # Record the interest transaction
+        interestTransaction = super()._createTransaction("interest", interest)
+        self._addTransaction(interestTransaction)
 
              
         # Postconditions: Ensure balance is non-negative after adding interest
         assert self._balance >= 0, "Balance should be non-negative after adding interest."
 
         
-    # Encrypts and writes a single checking account transaction to "checking.txt" for permanent storage.
+    # Encrypts and writes a single checkings account transaction to "checkings.txt" for permanent storage.
     # Separate files for accounts
-    def _save_transactions(self):
+    # @param transaction: str, a string 
+    # @require transaction param is a string
+    # @ensure data is encrypted
+    def _save_transactions(self, transaction: str):
         fileName = "checking_{}.txt".format(self.getAccountNumber())
-        with open(fileName, "r+b") as outfile:
-             # Validate that the transaction is a string
+        with open(fileName, "ab") as outfile:        
+            
+            # Validate that the transaction is a string
             assert isinstance(transaction, str), "Transaction data must be a string."
         
             # Encrypt the transaction data
@@ -83,31 +103,41 @@ class CheckingAccount(BankAccount):
             
           
 
-    # Reads all encrypted transactions from "checking.txt", decrypts each, and prints to the console.
+    # Reads all encrypted transactions from "savings.txt", decrypts each, and prints to the console.
     def _load_transactions(self) -> str:
         fileName = "checking_{}.txt".format(self.getAccountNumber())
-        with open(fileName, "ab") as outfile:
+        with open(fileName, "r+b") as infile: 
             # Loop to read and decrypt each transaction in the file
             length = infile.readline().rstrip().decode()
             
             result = ""
             
-            
-            
-            while length != "":
-                length = int(length)
-                data = infile.read(length)
-                decrypted_data = decrypt_AES_CBC(data, self.key, self.iv)
+            try:
+                while length != "":
+                    length = int(length)
+                    data = infile.read(length)
+                    decrypted_data = decrypt_AES_CBC(data, self.key, self.iv)
+                    
+                    
                 
-                #Checks to see if transaction matches associated account number before adding it to the result
-                if str(self.getAccountNumber()) in decrypted_data:
                     result = result + decrypted_data + "\n" 
+                    
+                    # Move to the next transaction
+                    infile.readline()
+                    length = infile.readline().rstrip().decode()
+                    
+            except FileNotFoundError:
+                print(f"No transaction file found for account {self.getAccountNumber()}.")
+            except Exception as e:
+                print("Error reading transactions: ", e)
                 
-                # Move to the next transaction
-                infile.readline()
-                length = infile.readline().rstrip().decode()
+       
+            
                 
             return result
+        
+    
+
         
     
     # @Override, overides repr method from bankAccount
@@ -135,14 +165,22 @@ class CheckingAccount(BankAccount):
         
                 
         
-                
+        
         
         
     # Overrides _addTransaction from BankAccount to save each transaction to file immediately.
     # @param transaction: The transaction object to add to the transaction list and save to file. 
+    # @ensure param is a transaction object
     def _addTransaction(self, transaction: Transaction):
         assert isinstance(transaction, Transaction)
-        self._save_transactions((str(transaction), " Account Number: " + str(self.getAccountNumber())))
+        self._save_transactions((str(transaction)))
+   
+   
+    
+    # PRIVATE method, return the file name for an account
+    # @return a string, the file name that stores transactions
+    def _getFileName(self)->str:
+        return "savings_{}.txt".format(self.getAccountNumber())
         
         
         
@@ -153,8 +191,10 @@ def main():
     myAccount = CheckingAccount(39.00)
     myAccount.deposit(39.00) # Test deposit
     myAccount.withdrawal(10.00) # Test withdrawal
+    myAccount.addInterest()
      
     print(myAccount)
+    
     
     
     
