@@ -2,11 +2,14 @@
 # Project 3
 # CSEC 323
 # savingsAccount.py
-#
+# This file contains methods for handling a savings account
+
+# imports
 from AES_CBC import encrypt_AES_CBC, decrypt_AES_CBC
 from bankAccount import BankAccount  
 from transaction import Transaction
 from client import Client
+
 
 # The Savings Account class should inherit all the core attributes and methods of the BankAccount.
 class SavingsAccount(BankAccount):
@@ -15,18 +18,33 @@ class SavingsAccount(BankAccount):
     
     RESETFILE = True  # A class constant that clears the savings.txt file upon creating a Savings Account
 
+
+    # Constructs a savings account object
+    # @require balance is a positive floating point number
+    # #ensure savings account object is created
     def __init__(self, balance=0.0):
         
-        # if statement clears file if RESETFILE is True
+        # assertions to ensure input is valid
+        assert isinstance(balance, float), "Balance must be a floating point number"
+        assert balance >= 0, "Balance must be positive"
+        
+        
+        
+        # call bank account constructor
+        super().__init__("Savings", balance)
+        
+        # set the account number from the Client class
+        self._accountNumber = Client._nextAccountNumber
+        
+        # intialize overdraft counter to 0
+        self._overdraftCounter = 0
+        
+        # clears the file if RESETFILE is True
         if SavingsAccount.RESETFILE:
-            file = open("savings.txt", 'w')
+            file = open("savings_{}.txt".format(self.getAccountNumber()), 'w')
             file.close()
         
-        super().__init__("Savings", balance)
-
-        
-     
-        self.overdraft_count = 0
+        # Instance Variables for encryption
         self.key = b'MySuperSecretKey1222222222222222'  # AES-256 key (32 bytes)
         self.iv = b'MySuperSecretIV1'  # IV (16 bytes)
         
@@ -37,16 +55,20 @@ class SavingsAccount(BankAccount):
     # Allows up to three overdrafts, with increasing fees, and blocks withdrawals if the account balance is below $100 after 3 overdrafts.
     # @param amount: Amount to withdraw from the account (must be positive).
     # @return: True if withdrawal succeeds, False otherwise.
+    # @require amount is a positive floating point number
+    # @ensure amount is withdrawn from the account if account meets appropriate conditions for withdrawal to take place
      
     def withdrawal(self, amount: float)->bool:
         
         # if the account has a balance of over 10000, reset the overdraft count
         if self._balance > 10000.00:
-            self._overdraft_count = 0
+            self._overdraftCounter = 0
      
         # Preconditions: Ensure amount is positive and withdrawal is allowed under overdraft rules
+        assert isinstance(amount, float), "Amount must be a floating point number"
         assert amount > 0, "Withdrawal amount must be positive."
-        assert self.overdraft_count < 3 or self._balance >= 100, "Cannot withdraw: Balance must be at least $100 after 3 overdrafts."
+        
+        assert self._overdraftCounter < 3 or self._balance >= 100, "Cannot withdraw: Balance must be at least $100 after 3 overdrafts."
         
         
         # Check to see if amount is valid
@@ -56,12 +78,12 @@ class SavingsAccount(BankAccount):
         
         elif amount > self._balance:
             # Apply overdraft fee
-            self.overdraft_count += 1
+            self._overdraftCounter += 1
             # The overdraft fee for the first time is $20.
-            if self.overdraft_count == 1:
+            if self._overdraftCounter == 1:
                 fee = 20
             # The overdraft fee for the second time is $30. 
-            elif self.overdraft_count == 2:
+            elif self._overdraftCounter == 2:
                 fee = 30
             # The overdraft fee for the third time is $50.
             else:
@@ -92,6 +114,7 @@ class SavingsAccount(BankAccount):
 
     # @Override add interest method from bankaccount for savings account sub class
     # Resets overdraft count if balance exceeds $10,000.
+    # @ensure interest is added to the account if the account meets conditions to receive interest
     def addInterest(self):
         # Preconditions: Ensure balance is non-negative before adding interest
         assert self._balance >= 0, "Interest cannot be added to a negative balance."
@@ -107,7 +130,7 @@ class SavingsAccount(BankAccount):
         # Postconditions: Reset overdraft count if balance is high enough, ensure overdraft count is non-negative
         if self._balance > 10000:
             self.overdraft_count = 0  # Reset overdraft count if balance exceeds $10,000
-        assert self.overdraft_count >= 0, "Overdraft count should be non-negative."
+        assert self._overdraftCounter >= 0, "Overdraft count should be non-negative."
         
         
         # Preconditions:
@@ -117,6 +140,9 @@ class SavingsAccount(BankAccount):
         
     # Encrypts and writes a single savings account transaction to "savings.txt" for permanent storage.
     # Separate files for accounts
+    # @param transaction: str, a string 
+    # @require transaction param is a string
+    # @ensure data is encrypted
     def _save_transactions(self, transaction: str):
         fileName = "savings_{}.txt".format(self.getAccountNumber())
         with open(fileName, "ab") as outfile:        
@@ -138,7 +164,7 @@ class SavingsAccount(BankAccount):
     # Reads all encrypted transactions from "savings.txt", decrypts each, and prints to the console.
     def _load_transactions(self) -> str:
         fileName = "savings_{}.txt".format(self.getAccountNumber())
-        with open(fileName, "r+b") as outfile: 
+        with open(fileName, "r+b") as infile: 
             # Loop to read and decrypt each transaction in the file
             length = infile.readline().rstrip().decode()
             
@@ -150,9 +176,9 @@ class SavingsAccount(BankAccount):
                     data = infile.read(length)
                     decrypted_data = decrypt_AES_CBC(data, self.key, self.iv)
                     
-                    #Checks to see if transaction matches associated account number before adding it to the result
-                    if str(self.getAccountNumber()) in decrypted_data:
-                        result = result + decrypted_data + "\n" 
+                    
+                
+                    result = result + decrypted_data + "\n" 
                     
                     # Move to the next transaction
                     infile.readline()
@@ -162,6 +188,8 @@ class SavingsAccount(BankAccount):
                 print(f"No transaction file found for account {self.getAccountNumber()}.")
             except Exception as e:
                 print("Error reading transactions: ", e)
+                
+       
             
                 
             return result
@@ -183,23 +211,27 @@ class SavingsAccount(BankAccount):
         return ("Savings Account\nAccount Number = %d \nBalance = $%.2f\nTransactions: \n%s \n" %
         (self._accountNumber, self._balance, self._load_transactions())) 
                 
-        
                 
     
     # Overrides _addTransaction from BankAccount to save each transaction to file immediately.
     # @param transaction: The transaction object to add to the transaction list and save to file. 
+    # @ensure param is a transaction object
     def _addTransaction(self, transaction: Transaction):
         assert isinstance(transaction, Transaction)
-        self._save_transactions((str(transaction), " Account Number: " + str(self.getAccountNumber())))
-   
+        self._save_transactions((str(transaction)))
    
    
     # Equality method, checks to ensure checking accounts are equal
     # @param other: a savings account object
     # @Override, overrides eq method from bankAccount
-    def __eq__(self, other):
+    def __eq__(self, other)->bool:
         return(self.getBalance() == other.getBalance() and self.getAccountNumber() == other.getAccountNumber())
-        
+    
+    # PRIVATE method, return the file name for an account
+    # @return a string, the file name that stores transactions
+    def _getFileName(self)->str:
+        return "savings_{}.txt".format(self.getAccountNumber())
+    
         
 # Test function to demonstrate account actions and transaction loading.
 def main():
@@ -208,6 +240,4 @@ def main():
     myAccount.withdrawal(20.00) # Test withdrawal
     myAccount.deposit(30.00) # Test deposit
     myAccount.addInterest() # Test interest addition
-  
-    print(myAccount)
     
