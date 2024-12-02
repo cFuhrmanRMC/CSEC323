@@ -1,5 +1,5 @@
 # Authors: Cole Fuhrman, Bryce Kuberek, Jalen Neck, Trace Taylor, Dillon VanGlider
-# Project 2
+# Project 3
 # CSEC 323
 # bankAccount.py contains the bank account class
 
