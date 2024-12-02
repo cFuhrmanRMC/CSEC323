@@ -35,6 +35,8 @@ class BankAccount:
         assert accountType in ["Checking", "Savings"], "Invalid account type."      
         assert isinstance(balance, float), "balance must be a floating point value"
         assert balance >= 0.0, "Initial balance must be non-negative."
+        assert isinstance(accountNumber, int), "Account number must be an integer."
+        assert accountNumber >= 1000, "Account number must be greater than or equal to 1000."
         
         # Reset the account number class variable to 1000 if True
         if BankAccount.RESETACCOUNTNUMBER:
