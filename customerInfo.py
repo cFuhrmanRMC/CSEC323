@@ -1,10 +1,11 @@
-# Authors: Cole Fuhrman, Bryce Kuberek, Jalen Neck, Trace Taylor, Dillon VanGlider
-# Project 2
+# Authors: Cole Fuhrman, Bryce Kuberek, Jalen Neck, Trace Taylor, Dillon VanGilder
+# Project 3
 # CSEC 323
 # customerInfo.py
 # This file contains the address, name, and phone classes
 
-
+# Hashing library to store password
+import bcrypt
 
 
 # This class represents the data elements and methods required to implement an Address
@@ -279,3 +280,121 @@ class Phone():
 
         #return formatted string
         return "{}".format(newStr)
+    
+
+# This class represents the data elements and methods required to implement a Password
+# A password is defined as a string of characters between 8 and 16 characters long, without a specific set of characters.
+class Password():
+
+
+    # Invalid characters for password
+    INVALID_CHARS = {"/", "\ ", "<", ">","|", " "}
+
+
+    def __init__(self, password: str):
+        # Constructs a password object
+        #
+        # @param password, a string
+        #
+        # @require password: must be all valid string characters (Invalid string characters are {"/", "\", "<", ">","|", " "}), length is between 8 and 16. 
+        # @ensure password object is created
+        # @ensure password is hashed and not as plain text
+
+        #ensure password string can be iterated + valid in length/characters
+        assert isinstance(password, str), "Invalid type: password should be string"
+        #assert len(password) >= 8 and len(password) <= 16 and self.INVALID_CHARS not in password, "Password does not meet system requirements"
+        assert len(password) >= 8 and len(password) <= 16, "Password does not meet system requirements"
+
+        # iterate password and compare characters
+        badChar = False
+        for element in password:
+
+                # Early stopping if bad character exists
+                if (not badChar):
+                    badChar = element in self.invalidChars
+                else:
+                    raise Exception("Password cannot contain invalid characters")
+
+        # Generate salt, hash password with salt
+        self._salt = bcrypt.gensalt()
+        self._HashedPass = self.saltAndHash(password)
+
+
+    # This method hashes the password using a salt
+    #@param password, the password to be hashed
+    #@return str, the password now hashed with salt
+    #@ensure password is hashed and not as plain text
+    def saltAndHash(self, password: str) ->str:
+
+        #ensure password string can be iterated + valid in length/characters
+        assert isinstance(password, str), "Invalid type: password should be string"
+        #assert len(password) >= 8 and len(password) <= 16 and self.INVALID_CHARS not in password, "Password does not meet system requirements"
+        assert len(password) >= 8 and len(password) <= 16, "Password does not meet system requirements"
+
+        # iterate password and compare characters
+        badChar = False
+        for element in password:
+
+                # Early stopping if bad character exists
+                if (not badChar):
+                    badChar = element in self.invalidChars
+                else:
+                    raise Exception("Password cannot contain invalid characters")
+
+
+        # Convert the password to an array of bytes
+        bytes = password.encode('utf-8')
+
+        # Hashing user entered password
+        hashedPass = bcrypt.hashpw(bytes, self._salt)
+
+        return hashedPass
+    
+    # This method returns the hashed password
+    # @return HashedPass, a string
+    def getPassword(self)->str:
+
+        return self._HashedPass
+    
+    # This method changes the hashed password
+    # @param newPass, the password to change to
+    # @return str, the new hashed password
+    def changePassword(self, newPass)->str:
+
+        #ensure password string can be iterated + valid in length/characters
+        assert isinstance(newPass, str), "Invalid type: password should be string"
+        #assert len(newPass) >= 8 and len(newPass) <= 16 and self.INVALID_CHARS not in newPass, "Password does not meet system requirements"
+        assert len(newPass) >= 8 and len(newPass) <= 16, "Password does not meet system requirements"
+
+        # iterate password and compare characters
+        badChar = False
+        for element in newPass:
+
+                # Early stopping if bad character exists
+                if (not badChar):
+                    badChar = element in self.invalidChars
+                else:
+                    raise Exception("Password cannot contain invalid characters")
+
+
+        # Generate salt, hash password with salt
+        self._salt = bcrypt.gensalt()
+        self._HashedPass = self.saltAndHash(newPass)
+
+
+    # This method permits the use of == operator with two Password objects. 
+    # @return result: True if this two Passwords are the same
+    def __eq__(self, otherPass: str) -> bool :
+
+        # Encode the user password as bytes
+        otherBytes = otherPass.encode('utf-8')
+
+        # check password against stored hash
+        result = bcrypt.checkpw(otherBytes, self._HashedPass)
+        return result 
+
+    # return the Password details in a string readable format
+    # @return: The formatted, human readable string of the Password
+    def __repr__(self)->str:
+
+        return("{}".format(self._HashedPass))
