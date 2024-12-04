@@ -2,7 +2,7 @@
 # Project 3
 # CSEC 323
 # customerInfo.py
-# This file contains the address, name, and phone classes
+# This file contains the address, name, phone, and password classes
 
 # Hashing library to store password
 import bcrypt
@@ -349,7 +349,7 @@ class Password():
     #@param password, the password to be hashed
     #@return str, the password now hashed with salt
     #@ensure password is hashed and not as plain text
-    def saltAndHash(self, password: str) ->str:
+    def saltAndHash(self, password: str) ->bytes:
 
         #ensure password string can be iterated + valid in length/characters
         assert isinstance(password, str), "Invalid type: password should be string"
@@ -383,8 +383,9 @@ class Password():
     
     # This method changes the hashed password
     # @param newPass, the password to change to
-    # @return str, the new hashed password
-    def changePassword(self, newPass)->str:
+    # @require password: must be all valid string characters (Invalid string characters are {"/", "\", "<", ">","|", " "}), length is between 8 and 16. 
+    # @ensure password is hashed and not as plain text
+    def changePassword(self, newPass: str)->None:
 
         #ensure password string can be iterated + valid in length/characters
         assert isinstance(newPass, str), "Invalid type: password should be string"
@@ -424,3 +425,8 @@ class Password():
 
         return("{}".format(self._HashedPass))
 
+    # return the Password details in a string readable format
+    # @return: The formatted, human readable string of the Password
+    def __str__(self)->str:
+
+        return("{}".format(self._HashedPass))
