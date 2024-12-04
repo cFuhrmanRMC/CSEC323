@@ -233,11 +233,3 @@ class SavingsAccount(BankAccount):
         return "savings_{}.txt".format(self.getAccountNumber())
     
         
-# Test function to demonstrate account actions and transaction loading.
-def main():
-    # Create a new savings account and perform some transactions
-    myAccount = SavingsAccount(50.00)
-    myAccount.withdrawal(20.00) # Test withdrawal
-    myAccount.deposit(30.00) # Test deposit
-    myAccount.addInterest() # Test interest addition
-    
