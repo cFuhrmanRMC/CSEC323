@@ -22,7 +22,7 @@ class Address():
     # @param address, a list for address details
     #
     # @require address: must be 3 in length. First index is street, second the city, third the state abbreviation
-    # @ensure name object is created
+    # @ensure address object is created
     def __init__(self, address: list):
         
         # Ensure length of address
@@ -65,6 +65,29 @@ class Address():
     # @return state, a string
     def getState(self)->str:
         return self._state
+    
+
+    # Update address information
+    # @param newAddress, a list for address details
+    # @require address: must be 3 in length. First index is street, second the city, third the state abbreviation
+    # @ensure Address is updated
+    def updateAddress(self, newAddress: list)->None:
+
+        # Ensure length of address
+        assert len(newAddress) == 3, "Invalid address"
+
+        # Ensure street is tuple
+        assert isinstance(newAddress[0], tuple), "Street must be of type tuple with number in first index, street in second"
+        
+        # Grab details of address/street
+        street = newAddress[0]
+        city = newAddress[1]
+        stateAbbrev = newAddress[2]
+
+        # Update Address details
+        self.updateStreet(street)
+        self.updateCity(city)
+        self.updateState(stateAbbrev)
     
     # Update street information
     # @param newStreet, the new street to change in the Address
@@ -400,3 +423,4 @@ class Password():
     def __repr__(self)->str:
 
         return("{}".format(self._HashedPass))
+
