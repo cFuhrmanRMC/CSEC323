@@ -181,19 +181,6 @@ class CheckingAccount(BankAccount):
     # @return a string, the file name that stores transactions
     def _getFileName(self)->str:
         return "savings_{}.txt".format(self.getAccountNumber())
-        
-        
-        
-        
-# Test function to demonstrate account actions and transaction loading.        
-def main():
-    # Create a new savings account and perform some transactions
-    myAccount = CheckingAccount(39.00)
-    myAccount.deposit(39.00) # Test deposit
-    myAccount.withdrawal(10.00) # Test withdrawal
-    myAccount.addInterest()
-     
-    print(myAccount)
     
     
     
