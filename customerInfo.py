@@ -40,6 +40,7 @@ class Address():
     
         # Check street number/street + city + state abbrev
         assert isinstance(streetNo, str), "Street number should be a string"
+        assert isinstance(streetName, str), "Street name should be a string"
         assert 1 <= len(streetNo)<= 5 and streetNo.isnumeric(), "Invalid street name"
         assert 1 <= len(streetName)<= 25 and streetName.replace(" ", '').isalpha(), "Invalid street name"
         assert 1 <= len(city)<= 30 and city.isalpha(), "Invalid city name"
@@ -80,6 +81,7 @@ class Address():
         street = newStreet[1]
 
         assert isinstance(streetNo, str), "Street number should be a string"
+        assert isinstance(street, str), "Street name should be a string"
         assert 1 <= len(streetNo)<= 5 and streetNo.isnumeric(), "Invalid street name: must be numeric"
         assert 1 <= len(street)<= 25 and street.replace(" ", '').isalpha(), "Invalid street name: cannot contain numnbers"
 
