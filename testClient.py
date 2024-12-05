@@ -1,0 +1,108 @@
+# testClient.py
+# Group: Cole Fuhrman, Bryce Kuberek, Jalen Neck, Trace Taylor, Dillon VanGlider
+# CSEC 323-01: Software Security
+# Dr. McManus
+#
+
+import unittest
+
+from client import Client
+from customerInfo import Address, Name, Phone
+
+""" Define test TestClient class by extending the unittest.TestCase class"""
+
+class TestClient(unittest.TestCase):
+    
+    CLIENT_ONE_FIRSTNAME = "Cole"
+    CLIENT_ONE_LASTNAME = "Fuhrman"
+    CLIENT_ONE_PHONENUM = "8047292516"
+    CLIENT_ONE_ADDRESS =  [("1234","SmithSt"), "Ashland", "VA"]
+    CLIENT_ONE_PASSWORD = "1234ABCD"
+
+    
+    # The setup method creates a client
+    def setUp(self):
+        self.client1 = Client(TestClient.CLIENT_ONE_FIRSTNAME, TestClient.CLIENT_ONE_LASTNAME, TestClient.CLIENT_ONE_PHONENUM, TestClient.CLIENT_ONE_ADDRESS, "Checking", TestClient.CLIENT_ONE_PASSWORD)
+        
+        self.client2 = Client("James", "Smith", "1234567890", [("123", "Henry st"), "Ashland", "VA"], "Checking", "1234asdf")
+      
+ 
+
+    # The test_constructor method tests the constructor 
+    def testConstructor(self):
+        # test regular constructor function and acessor methods
+        self.assertEquals(self.client1.getFirstName(), TestClient.CLIENT_ONE_FIRSTNAME)
+        self.assertEquals(self.client1.getLastName(), TestClient.CLIENT_ONE_LASTNAME)        
+        self.assertEquals(self.client1.getPhone(), Phone(TestClient.CLIENT_ONE_PHONENUM))
+        self.assertEquals(str(self.client1.getAddress()), "1234 SmithSt Ashland, VA")
+        self.assertEquals(self.client1.getClientNumber(), 100)
+        
+        # Test to ensure the client has at least one account upon creation
+        accountList = self.client1._getAccounts()
+        self.assertEquals(accountList[0].getAccountType(), "Checking")
+        self.assertEquals(len(accountList), 1)
+        
+        # Test to ensure that client is handling bank account numbers 
+        self.client1.openAccount("Checking")
+        self.assertEquals(accountList[1].getAccountNumber(), 1001)
+        
+     
+        
+        
+    # test opening and closing a bank account
+    def testOpenAndCloseBankAccount(self):
+
+        self.client1.openAccount("Savings")
+        accountList = self.client1._getAccounts()
+        
+        
+        # Test to see if new account was opened
+        self.assertEquals(accountList[1].getAccountType(), "Savings")
+        self.assertEquals(accountList[0].getAccountType(), "Checking")
+        self.assertEquals(len(accountList), 2)
+        
+        
+        
+        # make a deposit to the checking account and then attempt to close the account
+        accountList[0].deposit(20.00)
+        closeAccountBooleanValue = self.client1.closeAccount(accountList[0])
+        
+        # Test to see that account was close, funds were withdrawn, and correct account was removed from the list
+        self.assertEquals(closeAccountBooleanValue, True)
+        accountList = self.client1._getAccounts()
+        self.assertEquals(len(accountList), 1)
+        self.assertEquals(accountList[0].getAccountType(), "Savings")
+        
+        # Test to ensure client can not close account, if they only have one account
+        closeAccountBooleanValue = self.client1.closeAccount(accountList[0])
+        self.assertEquals(closeAccountBooleanValue, False)
+        
+        
+    # test equal method    
+    def testEqMethod(self):
+        
+        self.assertEquals(self.client1, self.client1)
+        
+        
+    # tests to ensure account numbers are updated 
+    def testaccountNumbers(self):
+        self.client2.openAccount("Savings")
+        self.client2.openAccount("Checking")
+        self.client2.openAccount("Savings")
+        accountList = self.client2._getAccounts()
+        
+        self.assertEqual(len(accountList), 4)
+        
+        self.assertEqual(accountList[0].getAccountNumber(), 1000)
+        self.assertEqual(accountList[1].getAccountNumber(), 1001)
+        self.assertEqual(accountList[2].getAccountNumber(), 1002)
+        self.assertEqual(accountList[3].getAccountNumber(), 1003)
+        
+        
+
+ 
+        
+        
+        
+if __name__ == '__main__':
+    unittest.main()
