@@ -161,12 +161,12 @@ class Address():
     # return the Address details in a string readable format
     # @return: The formatted, human readable string of the Address
     def __str__(self) -> str:
-        return "{} {}, {}".format(self._street, self._city, self._state)
+        return "{}, {}, {}".format(self._street, self._city, self._state)
 
     # return the Address details in a string readable format
     # @return: The formatted, human readable string of the Address
     def __repr__(self)->str:
-        return "{} {}, {}".format(self._street, self._city, self._state)
+        return "{}, {}, {}".format(self._street, self._city, self._state)
 
 # This class represents the data elements and methods required to implement a Name
 # A Name is defined by a first and last name with strict parameters on length and characters.
