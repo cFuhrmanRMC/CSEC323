@@ -109,6 +109,11 @@ class Client:
     # @return: a string, the last name of the client holder
     def getLastName(self)->str:
         return self._name.getLastName()
+
+    # returns the full name of the client holder
+    # @return: a string, the full name of the client holder
+    def getFullName(self)->str:
+        return self._name
     
     # returns the client number
     # @return: an integer, the client number
