@@ -161,14 +161,89 @@ class TestClient(unittest.TestCase):
 
     # test changing client data
     def testChangeInfo(self):
-
-        #** NOT DONE
+    	
+    	# new client
+        self.client3 = Client(TestClient.CLIENT_ONE_FIRSTNAME, TestClient.CLIENT_ONE_LASTNAME, TestClient.CLIENT_ONE_PHONENUM, TestClient.CLIENT_ONE_ADDRESS, "Checking", TestClient.CLIENT_ONE_PASSWORD)
 
         # test mutator methods
-        pass
+        
+        # test to ensure name works correctly (len 1-25, no special chars) / correct type
+        invalidFirstNames = ["Dilllllllllllllllllllllllllllllllon", "", "D1ll@n", 5]
 
-        # test eq and str/repr methods
-        pass
+        # test to ensure name works correctly (len 1-25, no special chars)
+        invalidLastNames = ["VaaaaaaaaaaaaaaaaaaaanGildddddddddder", "", "V@nG1ld3r", 5]
+
+        # test to ensure phone works correctly (no 0 as first num, not too long + no special chars) / correct type
+        invalidPhones = ["091020929392s","91020929392s", 50]
+    
+        # test to ensure address works correctly (must be python list length 3 + must be correct types + must be correct lengths/characters + in list of correct states)
+        invalidAddresss = [[("1234", "Smith St"), "Ashland", "PA", "VA"], ["1234 Smith St", "Ashland", "VA"], 
+                           [("1234", ""), "Ashland", "VA"], [("1234", "Smith Sttttttttttttttt"), "Ashland", "VA"], [("1234", 30), "Ashland", "VA"],
+                           [(1234, "Smith St"), "Ashland", "VA"], [("", "Smith St"), "Ashland", "VA"], [("12333333333334", "Smith St"), "Ashland", "VA"],
+                           [("1234", "Smith St%"), "Ashland", "VA"], [("%", "Smith St"), "Ashland", "VA"],
+                           [("1234", "Smith St"), 30, "VA"] [("1234", "Smith St"), "", "VA"], [("1234", "Smith St"), "Ashlandddddddddddddddddddddddd", "VA"], 
+                           [("1234", "Smith St"), "Ashland%", "VA"], 
+                           [("1234", "Smith St"), "Ashland", "PA"], [("1234", "Smith St"), "Ashland", ""], [("1234", "Smith St"), "Ashland", 30]
+                           ]
+    
+        # test to ensure account type works correctly (must be "Checking" or "Savings")
+        invalidAccountTypes = ["checking", "savings", 30]
+
+        # test to ensure password works correctly (must be 8-16 chars in length, must not contain invalid chars + correct type
+        invalidPasswords = ["pass", "passssssssssssssssss", "password/", "password\\", "password<", "password>","password|", "password ", 30]
+
+
+        # test invalid first names 
+        for i in invalidFirstNames:
+            # test to ensure asserts occur
+            with self.assertRaises(AssertionError):
+                self.client3.getFullName().updatefirstName(i)
+                
+        # test invalid last names
+        for i in invalidLastNames:
+            # test to ensure asserts occur
+            with self.assertRaises(AssertionError):
+                 self.client3.getFullName().updateLastName(i)
+                 
+        # test invalid phones
+        for i in invalidPhones:
+            # test to ensure asserts occur
+            with self.assertRaises(AssertionError):
+                 self.client3.getPhone().updatePhone(i)
+        
+        # test invalid addresses
+        for i in invalidAddresss:
+            # test to ensure asserts occur
+            with self.assertRaises(AssertionError):
+                self.client3.getAddress().updateAddress(i)
+    
+    	# change and compare
+    	self.client3.getFullName().updatefirstName("Dawg")
+    	self.client3.getFullName().updatelastName("Cat")
+    	self.client3.getPhone().updatePhone("8045551234")
+    	self.client3.getAddress().updateAddress([("751", "Elephant Blvd"), "New Mexico", "VA"])
+    
+    	# new client for comparison
+    	self.client4 = Client("Dawg", "Cat", "8045551234", [("751", "Elephant Blvd"), "New Mexico", "VA"], "Checking", TestClient.CLIENT_ONE_PASSWORD)
+    
+    	# compare to original
+    	assertNotEqual(self.client3.getFullName(), self.client1.getFullName())
+    	assertNotEqual(self.client3.getPhone(), self.client1.getPhone())
+    	assertNotEqual(self.client3.getAddress(), self.client1.getAddress())
+    	
+        # test eq methods
+        assertNotEqual(self.client3.getFullName() == self.client1)
+        assertNotEqual(self.client3.getPhone() == self.client1)
+        assertNotEqual(self.client3.getAddress() == self.client1)
+        
+        # test str/repr methods
+        assertEqual(str(self.client3.getFullName()), "Dawg Cat")
+        assertEqual(str(self.client3.getPhone()), "8045551234")
+        assertEqual(str(self.client3.getAddress()), "751 Elephant Blvd New Mexico, VA")	
+
+		assertEqual(self.client3.getFullName().__repr__(), "Dawg Cat")
+        assertEqual(str(self.client3.getPhone()__repr__(), "8045551234")
+        assertEqual(str(self.client3.getAddress()__repr__(), "751 Elephant Blvd New Mexico, VA")
         
     # test opening and closing a bank account
     def testOpenAndCloseBankAccount(self):
@@ -226,7 +301,21 @@ class TestClient(unittest.TestCase):
         
         # ensure are equal
         self.assertEqual(self.client1 == self.client1)
-    
+        
+    # test str/repr method
+    def testToStr(self):
+    	
+    	fullName = str(self.client1.getFullName())
+    	
+    	#ensure string forms are equal
+    	self.assertEqual(str(self.client1) == "Client\nClient = {}\nClient Number = {}\nAddress: {}\nPhone = {}\n# of accounts: {}\n".format(fullName, self.client1.getClientNumber(), 
+    																																	TestClient.CLIENT_ONE_PHONENUM, TestClient.CLIENT_ONE_ADDRESS, 
+    																																	len(self.client1._getAccounts())
+    	
+		self.assertEqual(self.client1.__repr__() == "Client\nClient = {}\nClient Number = {}\nAddress: {}\nPhone = {}\n# of accounts: {}\n".format(fullName, self.client1.getClientNumber(), 
+    																																	TestClient.CLIENT_ONE_PHONENUM, TestClient.CLIENT_ONE_ADDRESS, 
+    																																	len(self.client1._getAccounts())																																
+    																																	
         
         
 if __name__ == '__main__':
