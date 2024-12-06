@@ -1,17 +1,19 @@
 # Authors: Cole Fuhrman, Bryce Kuberek, Jalen Neck, Trace Taylor, Dillon VanGilder
-# Project 3
+# Project 2
 # CSEC 323
 
 from bankAccount import BankAccount
 from savingsAccount import SavingsAccount
-#from checkingAccount import CheckingAccount
-from customerInfo import Address, Name
+from checkingAccount import CheckingAccount
+from customerInfo import Address, Name, Phone, Password
 
 # This module defines the Client class
 # A class to represent the data elements and methods required to implement a Client
 
 class Client:
     
+
+    INVALID_Char = {"/", "\\", "<", ">", "|", ""}
 
     _nextClientNumber = 100 # private class variable that holds the next client number
     RESETCLIENTNUMBER = True
@@ -31,32 +33,31 @@ class Client:
     # @param phone: The user's phone number (String, must be all numeric digits, length is 10, cannot start with “0”))
     # @param address: The user's address (Python list, must be size of 3 with street, city, and state abbreviation))
     # @param accountType: The user's type of inital account (String, must be either "Checking" or "Savings")
+    # @param password: The user's inital password for account
     #
     # @require firstName: must be between 1 and 25 characters with no special characters
     # @require lastName: must be between 1 and 40 characters with no special characters
     # @require phone: must be all numeric digits, length is 10, cannot start with “0”))
-    # @ensure address: must be size of 3.
+    # @require password:  must be between 8 and 16 non-blank or invalid characters.
+    # @ensure address: must be size of 3
     # @ensure accountType: must be either "Checking" or "Savings"
+    # @ensure password is assigned and not stored in plain text
     # @ensure unique client number is assigned
-    def __init__(self,firstName: str, lastName: str, phone: str, address: list, accountType: str):
+    def __init__(self,firstName: str, lastName: str, phone: str, address: list, accountType: str, password: str):
         
 
         # Preconditions:
         # - firstName must be a valid string of 1-25 alphabetic characters.
         # - lastName must be a valid string of 1-40 alphabetic characters.
         # - phone must be 10-digit phone number (all numeric digits, length is 10, cannot start with “0”).
+        # - password must be between 8 and 16 non-blank or invalid characters.
         # - address must be a valid python list of 3 in size
         # - accountType must be a valid string either "Checking" or "Savings"
 
         # Postconditions:
         # - A unique client number is assigned.
         # - The client has a list of accounts.
-  
-        # Ensure valid phone number (does not include dashes)
-        assert phone[0] != 0 and len(phone) == 10 and phone.isnumeric(), "Invalid phone number"	
-        
-        # use Address class to create address
-        validAddress = Address(address)
+        # - The password is not stored in plain text
         
         # ensure account type is valid
         assert accountType == "Checking" or accountType == "Savings"
@@ -69,9 +70,12 @@ class Client:
         
         # Add personal info
         self._name = Name(firstName, lastName)
-        self._phone = phone
-        self._address = validAddress
-        
+        self._phone = Phone(phone)
+        self._address =  Address(address)
+
+        # create hashed password
+        self._password = Password(password)
+
         # Open new account based on type
         self.openAccount(accountType)
 
@@ -80,15 +84,10 @@ class Client:
         
         # Update next client number
         Client._nextClientNumber = Client._nextClientNumber = Client._nextClientNumber + 1
-        
-        
-       
-        
-
+           
     ##
     # Define acessor methods
     ##
-
 
     # returns the phone of the client holder
     # @return: a string, the first name of the client holder
@@ -100,7 +99,6 @@ class Client:
     def getAddress(self)->Address:
         return self._address
     
-
      # returns the first name of the client holder
     # @return: a string, the first name of the client holder
     def getFirstName(self)->str:
@@ -116,10 +114,98 @@ class Client:
     def getClientNumber(self)->int:
         return self._clientNumber
     
+    # returns the hashed password of the client holder 
+    # @return Password object, the hashed password of the client holder
+    def _getPassword(self)->str:
+        return self._password.getPassword()
+    
     # returns the Client's list of accounts
     # @return: a list, the list of accounts 
     def _getAccounts(self)->list:
         return self._accounts
+    
+    # This function adds an option to change the user's password
+    # @param password, the current password of the user
+    # @ensure password is hashed and not as plain text
+    def changePassword(self, password: str)->None:
+        
+        # Entered password for user: object for comparison
+        userInput = Password(password)
+
+        # First: Validate current password
+        # Failed validation re-prompts user
+        while (userInput != self._password):
+            print("Error: Incorrect password, please enter again!")
+
+            # Re-try validation of password
+            temp = input("Enter password: ")
+            try:
+                userInput.changePassword(temp)
+            except:
+                print("Password does not meet system requirements")
+
+        # Next: Create new password
+        newPass = input("New password: ")
+        validPass = False
+
+        # Ensure meets requirements
+        while (not validPass):
+            
+            if self._checkPassword(newPass):
+                validPass = True
+            else:
+                print("Password does not meet system requirements")
+                newPass = input("New password: ")
+
+        # Lastly: re-prompt user for new password
+        newPassReprompt = input("Re-enter password: ")
+
+        # Validate new password
+        # Failed validation re-prompts user        
+        while (newPass != newPassReprompt):
+            print("Error: Passwords do not match, please enter again!")
+
+            # Re-try validation of password
+            newPassReprompt = input("Re-enter password: ")
+
+        # Set new password
+        self._password = Password(newPass)
+
+
+    # This method checks the password is valid based on characters found within
+    # @param password, the password to be checked
+    # @return bool, if the password is invalid or not
+    def _checkPassword(self, password: str)->bool:
+
+        # bool to check validity of password
+        valid = True
+
+        # bool to check validity of characters in password
+        badChar = False
+
+        # ensure password string can be iterated
+        if not isinstance(password, str):
+            print("Invalid type: password should be string")
+            valid= False
+        # ensure password is valid in length
+        if len(password) < 8 or len(password) >  16:
+            print("Invalid password, must be between 8 and 16 characters")
+            valid = False
+
+        # If instance of string and valid in length:
+        # ensure password does not contain invalid characters
+        if (valid):
+
+            # iterate password and compare characters
+            for element in password:
+
+                # Early stopping if bad character exists
+                if (not badChar):
+                    badChar = element in password.invalidChars
+                else:
+                    valid = False
+
+        return valid
         
     # open an account based on type for the client
     # @param accountType: string, the type of bank account
@@ -203,14 +289,38 @@ class Client:
 
 
     # return the Client details in a string readable format
-    # @return: The formatted, human readable string of the Client
+    # @return: a string, The formatted, human readable string of the Client
     def __str__(self) -> str:
        # display first name, last name, client number, address, phone, and number of bank accounts on file
         return ("Client\nClient = %s\nClient Number = %d\nAddress: %s\nPhone = %s\n# of accounts: %d \n" %
         (self._name, self._clientNumber, str(self._address), self._phone, len(self._accounts)))
     
+    # This function hashs the password and adds a salt to secure the password in the system
+    # @param password, the password to be hashed
+    # @return bool, if the creation of the hash was successful or not
+    # @ensure password is hashed and not as plain text
+    '''
+    def _hashPassword(self, password: str)->bool:
 
+        #ensure password string can be iterated + valid in length/characters
+        assert isinstance(password, str), "Invalid type: password should be string"
+        assert 8 <= len(password) <=  16, "Invalid password, must be between 8 and 16 characters" 
+        assert self._checkPassword(password), "Invalid passowrd, cannot contain invalid characters"
+        
+        # create salt + apply hashing alogrithm w/ salt
+        self._salt = os.urandom(16)  
+        self._iterations = 100_000
+        self._hash_algo = 'sha256'
+        hash_value = hashlib.pbkdf2_hmac(
+            self._hash_algo,
+            self._salt,
+            self._iterations
+        )  
+        self._hash = hash_value 
 
+        if self._comparePassword(password):
+            return True
+    '''
     # ** MAY NOT NEED. IF WE WANT, WE CAN PRINT THE NUMBERS AND TYPE OF ACCOUNTS INSTEAD OF THE TOTAL NUMBER of ACCOUNTS IN THE displayClientDetails, __REPR__ AND __STR__ METHODS
 
     # converts the bank account list into a readable string 
@@ -232,9 +342,9 @@ class Client:
 #
 if __name__ == '__main__':
  
-    address = ["HenrySt", "Ashland", "VA"]
+    address = [("304", "Henry St"), "Ashland", "VA"]
   
-    newClient = Client("Johnny", "Cash", "8045559042", address, "Savings")
+    newClient = Client("Johnny", "Cash", "8045559042", address, "Savings", "dey80")
     
     newClient.openAccount("Savings")
     myList = newClient._getAccounts()
