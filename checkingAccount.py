@@ -107,6 +107,7 @@ class CheckingAccount(BankAccount):
           
 
     # Reads all encrypted transactions from "savings.txt", decrypts each, and prints to the console.
+    # @return: results of the file.
     def _load_transactions(self) -> str:
         fileName = "checking_{}.txt".format(self.getAccountNumber())
         with open(fileName, "r+b") as infile: 
@@ -163,6 +164,7 @@ class CheckingAccount(BankAccount):
     # Equality method, checks to ensure checking accounts are equal
     # @Override, overrides eq method from bankAccount
     # @param: other, a checking account object
+    # @return: checking accounts are equal.
     def __eq__(self, other):
         return(self.getBalance() == other.getBalance() and self.getAccountNumber() == other.getAccountNumber())
         
