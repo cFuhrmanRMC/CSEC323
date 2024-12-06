@@ -1,58 +1,71 @@
 # Authors: Cole Fuhrman, Bryce Kuberek, Jalen Neck, Trace Taylor, Dillon VanGlider
-# Project 1
+# Project 3
 # CSEC 323
-
+# bankAccount.py contains the bank account class
 
 
 # import transaction class to create and manipulate transactions
 from transaction import Transaction
 
+
 # This module defines the BankAccount class
 # A class to represent the data elements and methods required to implement a bank account
 
 class BankAccount:
-
-    _nextAccountNumber = 1000 # private class variable that holds the next account number
+    
     _overdraftFee = 20.00 # private class vairable that holds the overdraft fee
     _interestRate = 0.075 # private class variable that holds the interest rate
-
+    
+    
+    RESETACCOUNTNUMBER = True 
+    
+    
+    _validTypes = {"Checking", "Savings"}
 
     # Constructs a bank account
     # 
-    # @param firstName: the first name of the account holder (String, must be between 1 and 25 characters with no special characters)
-    # @param lastName: The user's last name (String, must be between 1 and 40 characters with no special characters))  
+    # @param accountType: the type of account (Checking or Savings), a string 
     # @param balance: The user's initial balance (Floating point, must be a positive float) default set to 0.0
     #
-    # @require firstName: must be between 1 and 25 characters with no special characters
-    # @require lastName: must be between 1 and 40 characters with no special characters
+    # @require accountType belongs to account type set 
     # @require balance: must be a positive float
     # @ensure self._balance >= 0.0
     # @ensure unique account number is assigned
-    def __init__(self,accountType: str, balance: float = 0.0 ):
-
-        # Preconditions:
-        # - firstName must be a valid string of 1-25 alphabetic characters.
-        # - lastName must be a valid string of 1-40 alphabetic characters.
-        # - balance must be a non-negative float.
-
-        # Postconditions:
-        # - A unique account number is assigned.
-        # - The initial balance is set or defaulted to 0.0.
-
-        assert accountType in ["Checking", "Savings"], "Invalid account type."      
+    def __init__(self, accountType: str, accountNumber: int, balance: float = 0.0):
+        
+        # Verify types
+        assert accountType in BankAccount._validTypes, "Invalid account type."   
+        
+        # Verify Balance
         assert isinstance(balance, float), "balance must be a floating point value"
         assert balance >= 0.0, "Initial balance must be non-negative."
+        
+        # Verify Account Number
+        assert isinstance(accountNumber, int), "Invalid Account Number"
+        assert accountNumber >= 1000 and accountNumber <= 9999, "Invalid Account Number"
+        
+            
+            
+        # Set the intial transaction number 
+        self._transNum = 100
 
+        
+        
+        # Set the account number from the client class or the default account number from the Bank Account class if one is not provided
+        self._accountNumber = accountNumber
+        
 
         self._accountType = accountType  # Account type: "Checking" or "Savings"
         self._balance = balance # Account balance
-        self._accountNumber = BankAccount._nextAccountNumber # set account number
+    
 
-        #Increase account number by one to update account number
-        BankAccount._nextAccountNumber = BankAccount._nextAccountNumber + 1  
+   
 
         self._overdraftCounter = 0  # Tracks overdraft occurrences
         self._transactionList = []  # List to store transactions
+    
+        
+      
 
     #   
     # Define special methods
@@ -63,7 +76,7 @@ class BankAccount:
     # @return: The formatted, human readable string of the account
     def __repr__(self) -> str:
        # display accountType, account number, balance, and transaction list
-        return ("Bank Account\nAccount Holder = %s %s\nAccount Number = %d\nBalance = $%.2f\nTransactions:\n%s \n" %
+        return ("Bank Account\nAccount Type = %s\nAccount Number = %d \nBalance = $%.2f \nTransactions: \n%s \n" %
         (self._accountType, self._accountNumber, self._balance, self.displayTransactions())) 
 
 
@@ -71,19 +84,20 @@ class BankAccount:
     # @return: The formatted, human readable string of the account
     def __str__(self) -> str:
         # display accountType, account number, balance, and transaction list
-        return ("Bank Account\nAccount Holder = %s %s\nAccount Number = %d\nBalance = $%.2f\nTransactions:\n%s \n" %
+        return ("Bank Account\nAccount Type = %s\nAccount Number = %d\nBalance = $%.2f\nTransactions: \n%s \n" %
         (self._accountType, self._accountNumber, self._balance, self.displayTransactions())) 
         
+   
     # Checks a BankAccount to see if it is equal to the second BankAccount
     # @param other: the transaction your are comparing the first transaction with
     # @return result: True if this two transaction have the same amount and dates, and tNumber
     def __eq__(self, other) -> bool :
-        result = (self._account_type == other._account_type and
+        result = (self._accountType == other._accountType and
                 self._accountNumber == other._accountNumber and
                 self._balance == other._balance and
                 self._transactionList == other._transactionList and
                 self._overdraftCounter == other._overdraftCounter)
-         return result 
+        return result 
         
     ##
     # Define acessor methods
@@ -92,26 +106,26 @@ class BankAccount:
     # return the type of the account
     # @return: a string, account type
     def getAccountType(self) -> str:
-        return self._account_type
+        return self._accountType
 
     # return the balance of the account
     # @return: a foating point, the balance of the account
-    def getBalance(self)->float:
+    def getBalance(self) -> float:
         return self._balance
 
     # return a list of all transactions
     # @return: a list, a list of the transactions
-    def getTransactions(self)->list:
+    def getTransactions(self) -> list:
         return self._transactionList
 
     # returns the account number
     # @return: an integer, the account number
-    def getAccountNumber(self)->int:
+    def getAccountNumber(self) -> int:
         return self._accountNumber
 
     # returns the overdraft counter
     # @return: an integer, the overdraft counter
-    def getOverdraftCounter(self)->int:
+    def getOverdraftCounter(self) -> int:
         return self._overdraftCounter
 
     # converts the transaction list into a readable string 
@@ -151,10 +165,10 @@ class BankAccount:
         self._balance = self._balance + amount
 
         # create a deposit transaction object 
-        depositTransaction = Transaction("deposit", amount)
+        depositTransaction = self._createTransaction("deposit", amount)
 
         # apend transaction to the list of transactions
-        self.addTransaction(depositTransaction)
+        self._addTransaction(depositTransaction)
 
         print("Deposited: $%.2f \n" % amount)
 
@@ -168,14 +182,11 @@ class BankAccount:
     # @require withdrawl amount is less than or equal to current balance + 250
     # @ensure overdraft fee is applied if account is overdrawn
     # @ensure amount is withdrawn from the account is valid
+    
     def withdrawal(self, amount: float)->bool:
-        # Preconditions:
-        # - The withdrawal amount must be less than or equal to the current balance + 250 (overdraft limit).
-
-        # Postconditions:
-        # - If the account is overdrawn, a penalty is applied and a message is printed.
+     
         assert isinstance(amount, float), "Withdrawal amount must be a floating point value"
-        assert amount > 0, "Withdrawal amount must be positive."
+        assert amount >= 0, "Withdrawal amount must be positive."
 
         # Check to see if amount is valid
         if amount > self._balance + 250:
@@ -183,9 +194,9 @@ class BankAccount:
             return False
 
         # Check to see if balance is postive
-        elif self._balance > 0:
-            withdrawalTransaction = Transaction("withdrawal", amount)
-            self.addTransaction(withdrawalTransaction)
+        elif self._balance >= 0:
+            withdrawalTransaction = self._createTransaction("withdrawal", amount)
+            self._addTransaction(withdrawalTransaction)
             self._balance = self._balance - amount
             print("Withdrawal: $%.2f\n" % amount)
 
@@ -193,10 +204,10 @@ class BankAccount:
             if self._balance < 0:
                 # if balance is negative apply over draft fee
                 self._balance = self._balance - BankAccount._overdraftFee
-                self.increaseOverdraftCounter()
+                self._increaseOverdraftCounter()
                 # Create a penalty transaction and add it to the transaction list
-                penaltyTransaction = Transaction("penalty", BankAccount._overdraftFee)
-                self.addTransaction(penaltyTransaction)
+                penaltyTransaction = self._createTransaction("penalty", BankAccount._overdraftFee)
+                self._addTransaction(penaltyTransaction)
                 print("Account is overdrawn. Overdraft fee applied.")
 
             return True
@@ -215,8 +226,8 @@ class BankAccount:
         self._balance = self._balance + interest
 
         # create a interest transaction object and add it to the transaction list
-        transaction = Transaction("interest", interest)
-        self.addTransaction(transaction)
+        transaction = self._createTransaction("interest", interest)
+        self._addTransaction(transaction)
 
         print("Interest of $%.2f applied." %interest)        
 
@@ -225,6 +236,7 @@ class BankAccount:
     # @param otherAccount: BankAccount, the other account that is transfering an amount to this account
     # @require amount is a postive floating point number
     # @ensure amount is transfered from other account to this account if other account has suffiencent funds
+    # @ensure amount cannot be transfered to the same account
     def transfer(self, amount:float, otherAccount):
         # Preconditions:
         # - The from_account must have sufficient funds or overdraft capacity.
@@ -233,6 +245,7 @@ class BankAccount:
         # - If the transfer is successful, the amount is withdrawn from the 'from_account' and deposited into the 'to_account'.
         assert isinstance(amount, float), "Transfer amount must be a floating point value"
         assert amount > 0.0, "Amount must be positive"
+        assert self != otherAccount, "Transfers cannot take place in the same account"
 
         # check if the withdrawal is successful
         transferStatus = otherAccount.withdrawal(amount)
@@ -241,8 +254,8 @@ class BankAccount:
         if(transferStatus):
 
             # create a transfert transaction object and add it to the transaction list
-            transferTransaction = Transaction("transfer", amount)
-            self.addTransaction(transferTransaction)
+            transferTransaction = self._createTransaction("transfer", amount)
+            self._addTransaction(transferTransaction)
 
             # deposit the amount to this account
             self.deposit(amount)
@@ -258,4 +271,18 @@ class BankAccount:
     # @require transaction is a valid transaction object
     def _addTransaction(self, transaction: Transaction):
         assert isinstance(transaction, Transaction), "transaction must be a valid transaction object"
+        
         self._transactionList.append(transaction)
+        
+        
+        
+    # Private method, creates a transaction with the transaction number from the bankAccount class
+    def _createTransaction(self, transType: str, amount: float):
+        transaction = Transaction(transType, amount, self._transNum)
+        # increase transaction number by 1
+        self._transNum = self._transNum + 1
+        
+        return transaction
+    
+    
+    

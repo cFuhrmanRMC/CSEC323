@@ -19,11 +19,12 @@ class Transaction :
    #  @ensure tType is in the set {"deposit", "withdrawal", "interest", "transfer", "penalty"}
    #  @ensure date is a valid date
    
-   def __init__(self, tType = "", amount = 0.0) :
+   def __init__(self, tType = "", amount = 0.0, transactionNumber = _nextTransaction) :
       
       assert amount >= 0.0
       assert isinstance(amount, float) or isinstance(amount, int)
       assert tType in Transaction._typeSet
+      assert isinstance(transactionNumber, int)
       
       if Transaction.DEBUG:
          print ("Creating a new transaction")
@@ -32,7 +33,7 @@ class Transaction :
          Transaction._nextTransaction = 100 
          
       # Set the transaction number and increment the next transaction class variable
-      self._tNumber = Transaction._nextTransaction
+      self._tNumber = transactionNumber
       Transaction._nextTransaction = Transaction._nextTransaction + 1      
       
       # Set the tType 
@@ -43,6 +44,7 @@ class Transaction :
    
       # Set the date to today's date
       self._setDate()
+      
 
       return
 
@@ -132,3 +134,5 @@ class Transaction :
       self._day = date[2]
 
       return 
+   
+   
