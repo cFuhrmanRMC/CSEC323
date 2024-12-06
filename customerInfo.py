@@ -26,6 +26,7 @@ class Address():
     def __init__(self, address: list):
         
         # Ensure length of address
+        assert isinstance(address, list), "Address must be list"
         assert len(address) == 3, "Invalid address"
 
         # Ensure street is tuple
@@ -41,6 +42,8 @@ class Address():
         # Check street number/street + city + state abbrev
         assert isinstance(streetNo, str), "Street number should be a string"
         assert isinstance(streetName, str), "Street name should be a string"
+        assert isinstance(city, str), "City should be a string"
+        assert isinstance(stateAbbrev, str), "State should be a string"
         assert 1 <= len(streetNo)<= 5 and streetNo.isnumeric(), "Invalid street name"
         assert 1 <= len(streetName)<= 25 and streetName.replace(" ", '').isalpha(), "Invalid street name"
         assert 1 <= len(city)<= 30 and city.isalpha(), "Invalid city name"
@@ -74,15 +77,28 @@ class Address():
     def updateAddress(self, newAddress: list)->None:
 
         # Ensure length of address
+        assert isinstance(newAddress, list), "Address must be list"
         assert len(newAddress) == 3, "Invalid address"
 
         # Ensure street is tuple
         assert isinstance(newAddress[0], tuple), "Street must be of type tuple with number in first index, street in second"
-        
+
         # Grab details of address/street
         street = newAddress[0]
+        streetNo = street[0]
+        streetName = street[1]
         city = newAddress[1]
         stateAbbrev = newAddress[2]
+
+        # Check street number/street + city + state abbrev
+        assert isinstance(streetNo, str), "Street number should be a string"
+        assert isinstance(streetName, str), "Street name should be a string"
+        assert isinstance(city, str), "City should be a string"
+        assert isinstance(stateAbbrev, str), "State should be a string"
+        assert 1 <= len(streetNo)<= 5 and streetNo.isnumeric(), "Invalid street name"
+        assert 1 <= len(streetName)<= 25 and streetName.replace(" ", '').isalpha(), "Invalid street name"
+        assert 1 <= len(city)<= 30 and city.isalpha(), "Invalid city name"
+        assert len(stateAbbrev) == 2 and stateAbbrev in Address._VALID_STATES, "Invalid state"
 
         # Update Address details
         self.updateStreet(street)
@@ -118,6 +134,7 @@ class Address():
     def updateCity(self, newCity: str)->None:
         
         # check city
+        assert isinstance(newCity, str), "City should be a string"
         assert 1 <= len(newCity)<= 30 and newCity.isalpha(), "Invalid city name"
         
         # Store data in instance variable
@@ -130,14 +147,15 @@ class Address():
     def updateState(self, newState: str)->None:
         
         # Check state abbreviation
-        assert len(newState) == 2 and newState in Address._VALID_STATES, "Invalid state"
+        assert isinstance(newState, str), "State must be string"
+        assert len(newState) == 2 and newState in self._VALID_STATES, "Invalid state"
 
         # Store data in instance variable
         self._state = newState
     
     # @return result: True if this two Addresses have the same streets, citys, and state abbreviations
     def __eq__(self, other) -> bool :
-        result = (self._street == other._street) and (self._city == other._city) and (self._state == other._state)
+        result = (self._street[0] == other._street[0]) and self._street[1] == other._street[1] and (self._city == other._city) and (self._state == other._state)
         return result 
 
     # return the Address details in a string readable format
@@ -164,6 +182,8 @@ class Name():
     # @ensure name object is created
     def __init__(self, firstName: str, lastName: str):
         
+        assert isinstance(firstName, str), "Name must be string"
+        assert isinstance(lastName, str), "Name must be string"
         assert 1 <= len(firstName) <= 25 and firstName.isalpha(), "Invalid first name."
         assert 1 <= len(lastName) <= 40 and lastName.isalpha(), "Invalid last name."
         
@@ -187,6 +207,7 @@ class Name():
     def updateFirstName(self, first: str)->None:
         
         # check first name
+        assert isinstance(first, str), "Name must be string"
         assert 1 <= len(first) <= 25 and first.isalpha(), "Invalid first name."
         
         # Store data in instance variable
@@ -198,7 +219,8 @@ class Name():
     # @ensure last name is updated
     def updateLastName(self, last: str)->None:
         
-        # check first name
+        # check last name
+        assert isinstance(last, str), "Name must be string"
         assert 1 <= len(last) <= 40 and last.isalpha(), "Invalid last name."
         
         # Store data in instance variable
@@ -235,6 +257,7 @@ class Phone():
         # @ensure Phone object is created
 
         # Ensure valid phone number (does not include dashes)
+        assert isinstance(phone, str), "Phone must be string"
         assert phone[0] != 0 and len(phone) == 10 and phone.isnumeric(), "Invalid phone number; remove any dashes"	
 
         self._phone = phone  # Phone Number
@@ -252,6 +275,7 @@ class Phone():
     def updatePhone(self, phone: str)->None:
         
         # Ensure valid phone number (does not include dashes)
+        assert isinstance(phone, str), "Phone must be string"
         assert phone[0] != 0 and len(phone) == 10 and phone.isnumeric(), "Invalid phone number; remove any dashes"	
         
         # Store data in instance variable
@@ -327,7 +351,6 @@ class Password():
 
         #ensure password string can be iterated + valid in length/characters
         assert isinstance(password, str), "Invalid type: password should be string"
-        #assert len(password) >= 8 and len(password) <= 16 and self.INVALID_CHARS not in password, "Password does not meet system requirements"
         assert len(password) >= 8 and len(password) <= 16, "Password does not meet system requirements"
 
         # iterate password and compare characters
@@ -353,7 +376,6 @@ class Password():
 
         #ensure password string can be iterated + valid in length/characters
         assert isinstance(password, str), "Invalid type: password should be string"
-        #assert len(password) >= 8 and len(password) <= 16 and self.INVALID_CHARS not in password, "Password does not meet system requirements"
         assert len(password) >= 8 and len(password) <= 16, "Password does not meet system requirements"
 
         # iterate password and compare characters
@@ -389,7 +411,6 @@ class Password():
 
         #ensure password string can be iterated + valid in length/characters
         assert isinstance(newPass, str), "Invalid type: password should be string"
-        #assert len(newPass) >= 8 and len(newPass) <= 16 and self.INVALID_CHARS not in newPass, "Password does not meet system requirements"
         assert len(newPass) >= 8 and len(newPass) <= 16, "Password does not meet system requirements"
 
         # iterate password and compare characters

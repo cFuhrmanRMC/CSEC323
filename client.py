@@ -55,6 +55,7 @@ class Client:
         # - The password is not stored in plain text
         
         # ensure account type is valid
+        assert isinstance(accountType, str), "Account type must be a string"
         assert accountType == "Checking" or accountType == "Savings"
         
         if Client.RESETCLIENTNUMBER:
@@ -215,6 +216,7 @@ class Client:
         
 
         # ensure account type is valid
+        assert isinstance(accountType, str), "Account type must be a string"
         assert accountType == "Checking" or accountType == "Savings"
         
         # create a new Bank account + add to list of accounts for client
@@ -235,6 +237,9 @@ class Client:
     # @require client has at least one bank account
     # @ensure account has been closed for Client
     def closeAccount(self, bankAccount)->bool:
+
+        # ensure type
+        assert isinstance(bankAccount, BankAccount), "bank account must be of type BankAccount"
 
         # return False if Client only has one account
         if len(self._accounts) == 1:
