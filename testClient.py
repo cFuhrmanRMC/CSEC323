@@ -241,9 +241,9 @@ class TestClient(unittest.TestCase):
         assertEqual(str(self.client3.getPhone()), "8045551234")
         assertEqual(str(self.client3.getAddress()), "751 Elephant Blvd New Mexico, VA")	
 
-		assertEqual(self.client3.getFullName().__repr__(), "Dawg Cat")
-        assertEqual(str(self.client3.getPhone()__repr__(), "8045551234")
-        assertEqual(str(self.client3.getAddress()__repr__(), "751 Elephant Blvd New Mexico, VA")
+	assertEqual(self.client3.getFullName().__repr__(), "Dawg Cat")
+        assertEqual(str(self.client3.getPhone()__repr__()), "8045551234")
+        assertEqual(str(self.client3.getAddress()__repr__()), "751 Elephant Blvd New Mexico, VA")
         
     # test opening and closing a bank account
     def testOpenAndCloseBankAccount(self):
